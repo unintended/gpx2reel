@@ -15,6 +15,23 @@ drops duplicate recordings of the same ride (watch + bike computer + app) and st
 A short YAML config says what to show — highlights, places, how to cross gaps. A marker then rides the route
 over real terrain and satellite imagery under the real sun, rendered with Blender Cycles into a 1080×1920 video.
 
+## Examples
+
+Day stories from [examples/kyushu-2026](examples/kyushu-2026/README.md), 720p previews; full-size renders are in
+the [release](https://github.com/unintended/gpx2reel/releases/tag/example-kyushu-2026).
+
+Day 10 — sunset closing on a beach:
+
+https://github.com/user-attachments/assets/b0d4f093-dcc7-4037-b068-8fdd478c33bf
+
+Day 11 — a ferry inside the day, Unzen fumaroles, the climb counter:
+
+https://github.com/user-attachments/assets/f521c68b-3a3c-4760-98dd-b6aca018e5a6
+
+Day 12 — the last day and the finale zooming out to Japan:
+
+https://github.com/user-attachments/assets/74215001-65db-4fd4-ae5e-6fa83a8d8aa1
+
 ## Features
 
 - **Look:** satellite, stylized (land-cover palette with 3D trees, roads, rivers) or hybrid terrain; the sun
