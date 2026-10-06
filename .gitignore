@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# trip data never belongs in the repo (docs/trip-layout.md)
+.work/
+tracks/
+videos/
+footage/
+music/
+refs/
+track.yaml
+!tests/**/track.yaml
+sample_trip/
+*.gpx
+*.fit
+!tests/fixtures/**/*.gpx
+!tests/fixtures/**/*.fit
+# the shipped example trip (its .work/ stays ignored)
+!examples/*/tracks/
+!examples/*/track.yaml
+!examples/*/tracks/*.gpx
+
+# Blender
+*.blend
+*.blend1
+
+# local
+.env
+CLAUDE.local.md
+.claude/settings.local.json
+.DS_Store
+.idea/

@@ -1,0 +1,214 @@
+version: 1
+title: ''
+platform: instagram_reels
+pacing: mixed
+story_chain: false
+clock_offset_s: 0.0
+duration_s: 100.0
+fps: 30
+resolution:
+- 1080
+- 1920
+style:
+  terrain: satellite
+  exaggeration: 1.6
+  text_style: bold_minimal
+  color_mode: single
+  color: '#FF6B3D'
+  day_colors:
+  - '#FFD23F'
+  - '#FF9F1C'
+  - '#FF6B3D'
+  - '#F2385A'
+  - '#C2307A'
+  - '#8E3A9D'
+  - '#5B4BB7'
+  trail: band
+  ahead: hidden
+  day_night: true
+  night_s: 1.2
+  haze: 0.6
+  bloom: 0.8
+  contrast: 0.5
+  vignette: 0.4
+  clouds: 0.45
+  language: en
+  sun_disc: hinomaru
+avatar:
+  model: puck
+  color: periwinkle
+  scale: 1.0
+intro:
+  duration_s: 6.0
+  camera: overview
+  zoom:
+  - extent_km: 2400.0
+    center:
+    - 36.5
+    - 137.5
+    label: Japan
+  - extent_km: 420.0
+    center:
+    - 32.6
+    - 131.0
+    label: Kyushu
+  play_zoom: true
+days:
+- day: 1
+  camera: chase
+  start: Beppu Port
+  finish: Tadewara Wetlands
+  opening_s: 4.0
+- day: 2
+  camera: chase
+  finish: Aso foothills
+  opening_s: 4.0
+- day: 3
+  camera: chase
+  start: Kusasenri, Aso
+  finish: Takachiho Gorge
+  opening_s: 4.0
+- day: 4
+  camera: chase
+  finish: Okuragahama Beach
+  opening_s: 4.0
+- day: 5
+  camera: chase
+  finish: Aoshima
+  opening_s: 4.0
+- day: 6
+  camera: chase
+  start: Aoshima
+  finish: Miike Lake
+  opening: sunrise_beach
+  opening_s: 6.0
+- day: 7
+  camera: chase
+  finish: Kagoshima
+  opening_s: 4.0
+- day: 8
+  camera: chase
+  start: Izumi
+  finish: Yatsushiro
+- day: 9
+  camera: chase
+  finish: Amakusa
+- day: 10
+  camera: chase
+  finish: Shimoda Onsen
+  closing: sunset
+  closing_s: 5.0
+  closing_at: [32.3799, 129.9945]
+- day: 11
+  camera: chase
+  finish: Unzen
+- day: 12
+  camera: chase
+  finish: Nagasaki
+gaps:
+- after_day: 2
+  mode: road
+  duration_s: 1.5
+- after_day: 7
+  mode: road
+  duration_s: 1.5
+- after_day: 11
+  within_day: true
+  mode: ferry
+  duration_s: 1.5
+highlights:
+- poi: Mt Aso
+  at_km: 111.4
+  duration_s: 4.5
+  camera: orbit
+  caption: Active volcano · Nakadake crater
+  detail: high_res_dem
+  effects:
+  - steam_plume
+  lat: 32.8847
+  lon: 131.0861
+- poi: Sakurajima
+  at_km: 468.7
+  duration_s: 4.5
+  camera: orbit
+  caption: Active volcano · erupts almost daily
+  detail: high_res_dem
+  effects:
+  - steam_plume
+  lat: 31.5806
+  lon: 130.6594
+- poi: Amakusa Five Bridges
+  at_km: 614.0
+  duration_s: 4.5
+  camera: orbit
+  caption: Island to island across the sea
+  detail: high_res_dem
+  lat: 32.535
+  lon: 130.4235
+- poi: Unzen Jigoku
+  at_km: 756.1
+  duration_s: 4.5
+  camera: orbit
+  caption: Steaming hells of fumaroles
+  detail: high_res_dem
+  effects:
+  - fumaroles
+  lat: 32.7405
+  lon: 130.2630
+  orbit_km: 1.2
+  orbit_pitch_deg: 45
+labels:
+- name: Beppu Port
+  lat: 33.3011
+  lon: 131.5031
+  kind: sight
+- name: Mt Yufu
+  lat: 33.2823
+  lon: 131.3902
+  kind: peak
+  ele: 1583.0
+- name: Tadewara Wetlands
+  lat: 33.1238
+  lon: 131.233
+  kind: wetland
+- name: Kuju
+  lat: 33.0822
+  lon: 131.2409
+  kind: peak
+  ele: 1786.0
+- name: Kusasenri
+  lat: 32.8845
+  lon: 131.0626
+  kind: viewpoint
+- name: Takachiho Gorge
+  lat: 32.7021
+  lon: 131.3016
+  kind: sight
+- name: Okuragahama Beach
+  lat: 32.389
+  lon: 131.636
+  kind: sight
+- name: Aoshima
+  lat: 31.803
+  lon: 131.472
+  kind: town
+- name: Mt Takachiho-no-mine
+  lat: 31.8858
+  lon: 130.9194
+  kind: peak
+  ele: 1574.0
+- name: Shinmoedake
+  lat: 31.9093
+  lon: 130.8861
+  kind: peak
+  ele: 1421.0
+- name: Minamata
+  lat: 32.2123
+  lon: 130.4088
+  kind: town
+outro:
+  duration_s: 7.0
+  camera: overview
+  show_totals: true
+  zoom_out: true
+  route_points: [Beppu, Aso, Takachiho, Miyazaki, Kirishima, Kagoshima, Amakusa, Unzen, Nagasaki]
