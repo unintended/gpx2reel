@@ -51,10 +51,15 @@ A 20 s story of one day, with the days before it already drawn:
 
 ## Renders
 
-The rendered videos are not in git; they are attached to the GitHub release `example-kyushu-2026`.
+The rendered videos are not in git; they are attached to the
+[`example-kyushu-2026` release](https://github.com/unintended/gpx2reel/releases/tag/example-kyushu-2026).
 
-<!-- release links: upload to the example-kyushu-2026 release and link here.
-  Finals (1080×1920): videos/track-day10.mp4 (sunset closing), videos/track-day11.mp4, videos/track-day12.mp4,
-    covers videos/track-day10-cover.png, videos/track-day11-cover.png, videos/track-day12-cover.png
-  Drafts: videos/drafts/track-day06.mp4 (beach sunrise), videos/drafts/track-day07-style-band-puck.mp4 (Sakurajima)
--->
+| Video | Shows |
+|---|---|
+| [Day 10](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day10.mp4) ([cover](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day10-cover.png)) | sunset closing on a beach |
+| [Day 11](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day11.mp4) ([cover](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day11-cover.png)) | ferry inside a day, Unzen fumaroles, climb counter |
+| [Day 12](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day12.mp4) ([cover](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day12-cover.png)) | the last day and the finale zooming out to Japan |
+| [Day 6, draft](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day06.mp4) | beach sunrise opening |
+| [Day 7, draft](https://github.com/unintended/gpx2reel/releases/download/example-kyushu-2026/track-day07-style-band-puck.mp4) | orbit around Sakurajima with the steam plume |
+
+Finals are 1080×1920; drafts are rendered at 25 %.
