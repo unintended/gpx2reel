@@ -270,6 +270,7 @@ class OverlayData:
     place_alpha: np.ndarray | None = None
     climbs: list = field(default_factory=list)            # (km0, km1, ele0, ele1) of the big climbs
     route_points: list = field(default_factory=list)      # the finale's route line (storyboard.outro.route_points)
+    finale_pins: tuple | None = None  # zoom-out outro: (t_in, t_out, [(checkpoint, side, below)]), see plan_finale_pins
     credits: list = field(default_factory=list)           # attribution lines (style.credits), see credit_lines
 
     def tr(self, key: str):
@@ -334,7 +335,8 @@ def load_overlay_data(p: TripPaths) -> OverlayData:
     )
     plan_places(data)
     plan_callouts(data)
-    data.climbs = climbs(data.profile)
+    data.climbs = shown_climbs(climbs(data.profile), data)
+    plan_finale_pins(data)
     data.route_points = list(sb.outro.route_points) if sb.outro.zoom_out else []
     return data
 
@@ -379,6 +381,7 @@ def _profile(route: dict, n: int = 900) -> dict:
 
 CLIMB_MIN_M = 300.0           # a climb worth a counter: this much up…
 CLIMB_DIP_M = 40.0            # …without dropping more than this on the way
+CLIMB_MIN_S = 3.0             # …and a counter on screen for less than this is not shown at all
 CLIMB_FOOT_M = 25.0           # the climb starts where it leaves its low for good (not at the far end of a flat)
 
 
@@ -408,6 +411,20 @@ def climbs(profile: dict) -> list[tuple[float, float, float, float]]:
         if top > i0 and e[top] - e[i0] >= CLIMB_MIN_M:
             out.append(climb(k, e, i0, top))
     return out
+
+
+def shown_climbs(found: list, data: OverlayData) -> list:
+    """The climbs whose counter stays up for CLIMB_MIN_S of riding outside the day cards: in a reel of a whole
+    trip a climb passes in a second and its counter only flickers."""
+    f = data.frames
+    t, km = np.asarray(f["t"]), np.asarray(f["km"])
+    free = np.zeros(len(t), bool)
+    for sh in data.shots:
+        if sh["kind"] == "ride":
+            free |= (t >= sh["t0"]) & (t < sh["t1"])
+    for _, t0, t1 in day_card_windows(data.shots):
+        free &= ~((t >= t0) & (t <= t1))
+    return [c for c in found if np.count_nonzero(free & (km >= c[0]) & (km <= c[1])) >= CLIMB_MIN_S * data.fps]
 
 
 def _draw_climb(cv: Canvas, data: OverlayData, km: float, alpha: float) -> None:
@@ -717,6 +734,58 @@ def _draw_callout(cv: Canvas, data: OverlayData, i: int, shot: dict, t: float) -
         cv.plate((min(b[0] for b in boxes), boxes[0][1], max(b[2] for b in boxes), boxes[-1][3]), fade, pad=16)
 
 
+FINALE_PIN_K = 1.1             # the day pins are up while the camera is within this factor of its hold distance
+
+
+def _pin_label(data: OverlayData, cp: dict) -> str:
+    return cp["label"] if cp["label"] == data.tr("finish") else f"{data.tr('day')} {cp['day']}"
+
+
+def _pin_box(cv: Canvas, xy, text: str, side: int, below: bool, alpha: float = 1.0, draw: bool = False):
+    """A day pin's label in the outro: beside the pin, over or under it. Returns (label xy, box)."""
+    u = cv.u
+    lx, ly = xy[0] + side * 26 * u, xy[1] + (60 if below else -46) * u
+    return (lx, ly), cv.spans(lx, ly, [(text, cv.style.label_font, 32)], alpha, anchor="ls" if side > 0 else "rs", draw=draw)
+
+
+def plan_finale_pins(data: OverlayData) -> None:
+    """A zoom-out outro shows every day pin while the camera holds on the route and drops them all as it backs
+    out: laid out per frame they hopped sides and blinked while the pins ran together. The layout (side, over /
+    under, who fits) is fixed on the hold frame."""
+    f, shots = data.frames, data.shots
+    data.finale_pins = None
+    if not shots or shots[-1]["kind"] != "overview" or len(shots) < 2 or data.chain:
+        return
+    idx = np.flatnonzero(np.asarray(f["t"]) >= shots[-1]["t0"])
+    if len(idx) < 8:
+        return
+    d = np.log(np.asarray(f["cam_dist"], float)[idx])
+    half = max(len(idx) // 2, 2)
+    ref = int(np.argmin(np.abs(np.diff(d[:half]))))                # the stillest frame of the first half: the hold
+    if d.max() - d[ref] < math.log(2.0):                           # not a zoom-out: the pins stay to the end
+        return
+    k = math.log(FINALE_PIN_K)
+    before, after = np.flatnonzero(d[:ref + 1] >= d[ref] - k), np.flatnonzero(d[ref:] >= d[ref] + k)
+    t_in, t_out = float(f["t"][idx[before[0]]]), float(f["t"][idx[ref + after[0]]])
+    i = int(idx[ref])
+    cv = Canvas(data.size, data.style)
+    W, H = data.size
+    pts = np.array([cp["xyz"] for cp in data.checkpoints]).reshape(-1, 3)
+    xy, front = project(pts, f["cam"][i], f["target"][i], data.lens_mm, data.size)
+    pins, taken = [], []
+    for n, (cp, p, ok) in enumerate(zip(data.checkpoints, xy, front)):
+        if not ok or not (0 <= p[0] <= W and SAFE_TOP / BASE_H * H <= p[1] <= (SAFE_BOTTOM - 260) / BASE_H * H):
+            continue
+        first = -1 if p[0] > 0.6 * W else 1                        # labels on the right half point left
+        for side, below in ((first, False), (-first, False), (first, True), (-first, True)):
+            box = _pin_box(cv, p, _pin_label(data, cp), side, below)[1]
+            if box[0] >= 0 and box[2] <= W and not any(_overlaps(box, b, 6 * cv.u) for b in taken):
+                pins.append((n, side, below))
+                taken.append(box)
+                break
+    data.finale_pins = (t_in, t_out, pins)
+
+
 def draw_frame(data: OverlayData, i: int, credits: bool = False) -> Image.Image:
     """credits: draw the attribution whatever the frame (a cover); otherwise it shows in the outro."""
     f = data.frames
@@ -806,6 +875,18 @@ def draw_frame(data: OverlayData, i: int, credits: bool = False) -> Image.Image:
     passed = {k for k, cp in enumerate(data.checkpoints) if cp["s"] < f["s"][0] - 1e-6}   # day story: earlier days
     shown = [k for k in reached_at if (k not in passed and window(t, reached_at[k], reached_at[k] + 3.2) > 0)
              or (outro and t >= outro["t0"] and not data.chain)]           # chained: nothing to match across
+    if outro and t >= outro["t0"] and data.finale_pins:
+        t_in, t_out, pins = data.finale_pins
+        a = window(t, t_in, t_out)
+        shown = []
+        for k, side, below in pins if a > 0 else ():
+            xy, front = project(np.array([data.checkpoints[k]["xyz"]]), f["cam"][i], f["target"][i], data.lens_mm, data.size)
+            if not front[0]:
+                continue
+            x, y = xy[0]
+            (lx, ly), box = _pin_box(cv, (x, y), _pin_label(data, data.checkpoints[k]), side, below, a, draw=True)
+            cv.line((x, y + 10 * u if below else y - 10 * u), (lx - side * 6 * u, ly - 30 * u if below else ly + 10 * u), 3, a)
+            cv.plate(box, a, pad=14)
     if shown:
         pts = np.array([data.checkpoints[k]["xyz"] for k in shown])
         xy, front = project(pts, f["cam"][i], f["target"][i], data.lens_mm, data.size)

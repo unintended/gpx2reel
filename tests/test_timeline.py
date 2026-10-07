@@ -375,3 +375,10 @@ def test_finale_keeps_the_route_in_frame(setup):
     half_h = np.linalg.norm(cam - tgt) * 12.0 / rig.lens_mm
     assert path.xyz[:, 1].min() > tgt[1] - 0.16 * half_h          # and about above the middle (the card is below)
     assert np.allclose(poses[-1][1], ov[1])                        # the route overview itself is untouched
+
+
+def test_finale_dots_shrink_away_as_the_camera_backs_out():
+    from gpx2reel.timeline import _finale_dots
+
+    k = _finale_dots(np.array([470e3, 500e3, 1000e3, 1500e3, 3000e3]), CameraRig())
+    assert k[0] == k[1] == 1.0 and 0 < k[2] < 1 and k[3] == k[4] == 0.0

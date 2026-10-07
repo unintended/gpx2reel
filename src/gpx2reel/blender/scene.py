@@ -1111,6 +1111,9 @@ def add_light(sun_elevation_deg: float = 38, sun_azimuth_deg: float = 225):
     bpy.context.scene.world = world
     moon = _sun_lamp("Moon", MOON_AZ_EL[1], MOON_AZ_EL[0], 0.0, angle_deg=3.0)
     moon.data.color = tuple(MOON_COLOR)
+    # the moon lights, it does not mirror: its glint on the sea flew through the night frames as a white ball
+    moon.visible_glossy = False
+    moon.data.specular_factor = 0.0
     return _sun_lamp("Sun", sun_elevation_deg, sun_azimuth_deg, 3.5)
 
 

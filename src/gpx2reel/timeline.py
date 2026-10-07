@@ -65,6 +65,7 @@ class CameraRig:
     finale_trail_k: float = 0.55     # … the trail ends at this share of its usual width (full width reads too bold)
     finale_marker_k: float = 0.7
     finale_hold: tuple = (0.2, 0.3)  # zoom_out outro: share held on the route first and on the widest level last
+    finale_dots: tuple = (1.3, 3.0)  # … the day dots shrink to nothing between these × the hold distance
     zoom_hold: float = 0.15        # share of the intro spent on the widest level before zooming
     smooth_s: float = 0.25         # camera path smoothing
     clearance: float = 0.08        # min height above terrain, × camera distance
@@ -316,6 +317,13 @@ def day_clock_of(route: dict) -> dict[int, tuple[np.ndarray, np.ndarray]]:
         if len(pts):
             out[d["day"]] = (pts[:, 0], pts[:, 1])
     return out
+
+
+def _finale_dots(cam_dist: np.ndarray, rig: CameraRig) -> np.ndarray:
+    """Size factor of the day dots from the finale's hold frame on (cam_dist[0] = the hold distance): from far
+    off they are white specks on a small route, so they shrink away as the camera backs out."""
+    a, b = (math.log(k) for k in rig.finale_dots)
+    return 1.0 - _smoothstep((np.log(cam_dist / cam_dist[0]) - a) / (b - a))
 
 
 def frame_times(shots: list[Shot], t: np.ndarray, shot_of: np.ndarray, km: np.ndarray, day_clock: dict,
@@ -631,6 +639,8 @@ def build_frames(shots: list[Shot], path: Path3D, grid: TerrainGrid, lift_m: flo
     for sh in shots:
         if sh.camera == "zoom_out":
             finale = np.maximum(finale, _smoothstep((t - sh.t0) / max(sh.duration * 0.6, 1e-6)))
+            hold = int(np.argmin(np.abs(t - (sh.t0 + rig.finale_hold[0] * sh.duration))))
+            cp_scale[hold:] *= _finale_dots(cam_dist[hold:], rig)[:, None]
     beach_show = np.zeros(n)          # the coast set's water and surf: in its shot, fading out into the next
     trail_hide = np.zeros(n)          # the beach opening also hides the trail (see trail_width)
     for sh in shots:

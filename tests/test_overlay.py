@@ -239,6 +239,34 @@ def test_climb_counter_waits_for_the_day_card(monkeypatch):
     assert seen[0] > 0 and seen[1] == 0
 
 
+def test_a_climb_that_passes_in_a_blink_gets_no_counter():
+    d = _data(n=600)                                                 # day 1: one ride shot, 1–2 s
+    d.shots = _shots(("overview", 0, 1, None), ("ride", 1, 20, 1))
+    d.frames["km"] = np.clip((d.frames["t"] - 1), 0, 19)             # 1 km/s
+    assert O.shown_climbs([(6.0, 12.0, 0.0, 400.0), (13.0, 14.5, 0.0, 300.0)], d) == [(6.0, 12.0, 0.0, 400.0)]
+    assert O.shown_climbs([(1.0, 5.5, 0.0, 400.0)], d) == []         # 4.5 s, but the day card covers 4 of them
+
+
+def test_day_pins_leave_together_when_the_outro_zooms_out():
+    d = _data(n=240)
+    d.shots = d.shots + _shots(("overview", 3, 8, None))
+    tt = d.frames["t"]
+    d.frames["cam_dist"] = 5000.0 * np.where(tt < 5, 1.0, 1 + (tt - 5) * 3)      # holds on the route, then backs out
+    O.plan_finale_pins(d)
+    t_in, t_out, pins = d.finale_pins
+    assert t_in <= 3.1 and 5.0 < t_out < 5.2 and [k for k, _, _ in pins] == [0]
+    near = (SIZE[0] // 2, SIZE[1] // 2 - int(90 * SIZE[1] / O.BASE_H), SIZE[0] // 2 + int(200 * SIZE[1] / O.BASE_H), SIZE[1] // 2)
+    assert _alpha(O.draw_frame(d, 120), near) > 100                  # the hold: «Day 2» by its pin
+    assert _alpha(O.draw_frame(d, 165), near) == 0                   # backing out: gone, and it stays gone
+
+
+def test_a_still_outro_keeps_its_day_pins():
+    d = _data(n=240)
+    d.shots = d.shots + _shots(("overview", 3, 8, None))
+    O.plan_finale_pins(d)
+    assert d.finale_pins is None
+
+
 def test_finale_route_lines_three_places_each():
     pts = ["Beppu", "Aso", "Takachiho", "Miyazaki", "Kirishima", "Kagoshima", "Amakusa", "Unzen", "Nagasaki"]
     lines = O._route_lines(pts)
